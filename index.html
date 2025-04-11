@@ -9,7 +9,7 @@
     <title>DontPage | Advanced Cloud Notepad</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/base16/dracula.min.css">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="css/styles.css">
     <link rel="manifest" href="manifest.json">
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -375,4 +375,438 @@
                 <div class="form-group">
                     <label for="find-input">Find</label>
                     <input type="text" id="find-input" placeholder="Search text...">
-                </div
+                </div>
+                <div class="form-group">
+                    <label for="replace-input">Replace with</label>
+                    <input type="text" id="replace-input" placeholder="Replacement text...">
+                </div>
+                <div class="find-options">
+                    <label class="checkbox-container">
+                        <input type="checkbox" id="find-case-sensitive">
+                        <span class="checkmark"></span>
+                        Case sensitive
+                    </label>
+                    <label class="checkbox-container">
+                        <input type="checkbox" id="find-whole-word">
+                        <span class="checkmark"></span>
+                        Whole words only
+                    </label>
+                    <label class="checkbox-container">
+                        <input type="checkbox" id="find-regex">
+                        <span class="checkmark"></span>
+                        Regular expression
+                    </label>
+                </div>
+                <div class="find-results">
+                    <span id="find-count">0 matches found</span>
+                    <div class="find-buttons">
+                        <button class="btn-small" id="find-prev"><i class="fas fa-arrow-up"></i> Prev</button>
+                        <button class="btn-small" id="find-next"><i class="fas fa-arrow-down"></i> Next</button>
+                        <button class="btn-small" id="replace-btn">Replace</button>
+                        <button class="btn-small" id="replace-all-btn">Replace All</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="share-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Share Page</h3>
+                <button class="btn-icon modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="share-method active" id="share-link-method">
+                    <div class="form-group">
+                        <label for="share-link">Page URL</label>
+                        <div class="input-group">
+                            <input type="text" id="share-link" readonly>
+                            <button class="btn-secondary" id="copy-link-btn">Copy</button>
+                        </div>
+                    </div>
+                    <div class="share-options">
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="share-readonly" checked>
+                            <span class="checkmark"></span>
+                            Read-only link
+                        </label>
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="share-expiry">
+                            <span class="checkmark"></span>
+                            Set expiry date
+                        </label>
+                        <div class="form-group expiry-date hidden" id="share-expiry-date">
+                            <label for="expiry-date">Expires on</label>
+                            <input type="date" id="expiry-date">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="share-method" id="share-embed-method">
+                    <div class="form-group">
+                        <label for="embed-code">Embed Code</label>
+                        <textarea id="embed-code" readonly rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="embed-options">Embed Options</label>
+                        <select id="embed-options">
+                            <option value="full">Full editor</option>
+                            <option value="preview">Preview only</option>
+                            <option value="readonly">Read-only</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="share-method" id="share-social-method">
+                    <div class="social-buttons">
+                        <button class="btn-social twitter" id="share-twitter">
+                            <i class="fab fa-twitter"></i> Twitter
+                        </button>
+                        <button class="btn-social facebook" id="share-facebook">
+                            <i class="fab fa-facebook-f"></i> Facebook
+                        </button>
+                        <button class="btn-social linkedin" id="share-linkedin">
+                            <i class="fab fa-linkedin-in"></i> LinkedIn
+                        </button>
+                        <button class="btn-social reddit" id="share-reddit">
+                            <i class="fab fa-reddit-alien"></i> Reddit
+                        </button>
+                        <button class="btn-social whatsapp" id="share-whatsapp">
+                            <i class="fab fa-whatsapp"></i> WhatsApp
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div class="share-tabs">
+                    <button class="share-tab active" data-target="share-link-method">Link</button>
+                    <button class="share-tab" data-target="share-embed-method">Embed</button>
+                    <button class="share-tab" data-target="share-social-method">Social</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="account-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Account Settings</h3>
+                <button class="btn-icon modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="account-profile">
+                    <div class="profile-pic">
+                        <img src="https://ui-avatars.com/api/?name=User" alt="Profile" id="profile-image">
+                        <button class="btn-small" id="change-profile-btn">Change</button>
+                    </div>
+                    <div class="profile-info">
+                        <h4 id="profile-name">Guest User</h4>
+                        <p id="profile-email">guest@example.com</p>
+                        <div class="profile-stats">
+                            <div class="stat">
+                                <span class="stat-number" id="page-count">0</span>
+                                <span class="stat-label">Pages</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-number" id="char-count">0</span>
+                                <span class="stat-label">Characters</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-number" id="join-date">Today</span>
+                                <span class="stat-label">Member since</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="account-tabs">
+                    <button class="account-tab active" data-target="account-general">General</button>
+                    <button class="account-tab" data-target="account-security">Security</button>
+                    <button class="account-tab" data-target="account-subscription">Subscription</button>
+                </div>
+                
+                <div class="account-content active" id="account-general">
+                    <div class="form-group">
+                        <label for="account-name">Full Name</label>
+                        <input type="text" id="account-name" placeholder="Your name">
+                    </div>
+                    <div class="form-group">
+                        <label for="account-email">Email</label>
+                        <input type="email" id="account-email" placeholder="your@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="account-theme">Theme Preference</label>
+                        <select id="account-theme">
+                            <option value="system">System Default</option>
+                            <option value="light">Light Mode</option>
+                            <option value="dark">Dark Mode</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="account-language">Language</label>
+                        <select id="account-language">
+                            <option value="en">English</option>
+                            <option value="es">Español</option>
+                            <option value="fr">Français</option>
+                            <option value="de">Deutsch</option>
+                            <option value="pt">Português</option>
+                            <option value="zh">中文</option>
+                            <option value="ja">日本語</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="account-content" id="account-security">
+                    <div class="form-group">
+                        <label for="current-password">Current Password</label>
+                        <input type="password" id="current-password" placeholder="••••••••">
+                    </div>
+                    <div class="form-group">
+                        <label for="new-password">New Password</label>
+                        <input type="password" id="new-password" placeholder="••••••••">
+                    </div>
+                    <div class="form-group">
+                        <label for="confirm-password">Confirm Password</label>
+                        <input type="password" id="confirm-password" placeholder="••••••••">
+                    </div>
+                    <div class="form-group">
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="two-factor-auth">
+                            <span class="checkmark"></span>
+                            Enable Two-Factor Authentication
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label for="backup-codes">Backup Codes</label>
+                        <button class="btn-small" id="generate-backup-codes">Generate New Codes</button>
+                        <div class="backup-codes hidden" id="backup-codes-display"></div>
+                    </div>
+                </div>
+                
+                <div class="account-content" id="account-subscription">
+                    <div class="subscription-plan">
+                        <h4>Current Plan: <span id="current-plan">Free</span></h4>
+                        <p id="plan-details">Upgrade for more features and storage</p>
+                        <div class="plan-features">
+                            <div class="feature">
+                                <i class="fas fa-check"></i>
+                                <span>Unlimited pages</span>
+                            </div>
+                            <div class="feature">
+                                <i class="fas fa-check"></i>
+                                <span>Version history</span>
+                            </div>
+                            <div class="feature">
+                                <i class="fas fa-check"></i>
+                                <span>Collaboration</span>
+                            </div>
+                        </div>
+                        <button class="btn-primary" id="upgrade-plan-btn">Upgrade Plan</button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="logout-btn">Log Out</button>
+                <button class="btn-primary" id="save-account-btn">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="version-history-modal">
+        <div class="modal-content wide-modal">
+            <div class="modal-header">
+                <h3>Version History</h3>
+                <button class="btn-icon modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="version-timeline">
+                    <div class="version-search">
+                        <input type="text" id="version-search" placeholder="Search versions...">
+                        <select id="version-filter">
+                            <option value="all">All versions</option>
+                            <option value="today">Today</option>
+                            <option value="week">This week</option>
+                            <option value="month">This month</option>
+                        </select>
+                    </div>
+                    <div class="version-list" id="version-list">
+                        <!-- Versions will be loaded here dynamically -->
+                        <div class="version-empty">
+                            <i class="fas fa-history"></i>
+                            <p>No version history available</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="version-preview">
+                    <div class="version-preview-header">
+                        <h4 id="version-preview-title">Select a version to preview</h4>
+                        <div class="version-preview-actions hidden" id="version-actions">
+                            <button class="btn-small" id="restore-version-btn">Restore this version</button>
+                            <button class="btn-small" id="compare-version-btn">Compare with current</button>
+                        </div>
+                    </div>
+                    <div class="version-preview-content" id="version-preview-content">
+                        <p>Select a version from the list to view its contents</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary modal-close">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="ai-assistant-modal">
+        <div class="modal-content wide-modal">
+            <div class="modal-header">
+                <h3>AI Writing Assistant</h3>
+                <button class="btn-icon modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="ai-tabs">
+                    <button class="ai-tab active" data-target="ai-improve">Improve</button>
+                    <button class="ai-tab" data-target="ai-summarize">Summarize</button>
+                    <button class="ai-tab" data-target="ai-expand">Expand</button>
+                    <button class="ai-tab" data-target="ai-translate">Translate</button>
+                    <button class="ai-tab" data-target="ai-code">Code</button>
+                </div>
+                
+                <div class="ai-content active" id="ai-improve">
+                    <div class="form-group">
+                        <label for="ai-improve-text">Text to improve</label>
+                        <textarea id="ai-improve-text" rows="5" placeholder="Paste the text you want to improve"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="ai-improve-style">Style</label>
+                        <select id="ai-improve-style">
+                            <option value="default">Default</option>
+                            <option value="formal">Formal</option>
+                            <option value="casual">Casual</option>
+                            <option value="academic">Academic</option>
+                            <option value="creative">Creative</option>
+                            <option value="business">Business</option>
+                        </select>
+                    </div>
+                    <button class="btn-primary" id="ai-improve-btn">Improve Text</button>
+                    <div class="ai-result hidden" id="ai-improve-result"></div>
+                </div>
+                
+                <div class="ai-content" id="ai-summarize">
+                    <div class="form-group">
+                        <label for="ai-summarize-text">Text to summarize</label>
+                        <textarea id="ai-summarize-text" rows="5" placeholder="Paste the text you want to summarize"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="ai-summarize-length">Summary Length</label>
+                        <select id="ai-summarize-length">
+                            <option value="short">Short (1-2 sentences)</option>
+                            <option value="medium">Medium (paragraph)</option>
+                            <option value="long">Long (detailed)</option>
+                        </select>
+                    </div>
+                    <button class="btn-primary" id="ai-summarize-btn">Summarize</button>
+                    <div class="ai-result hidden" id="ai-summarize-result"></div>
+                </div>
+                
+                <div class="ai-content" id="ai-expand">
+                    <div class="form-group">
+                        <label for="ai-expand-text">Text to expand</label>
+                        <textarea id="ai-expand-text" rows="5" placeholder="Paste the text you want to expand"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="ai-expand-detail">Detail Level</label>
+                        <select id="ai-expand-detail">
+                            <option value="light">Light expansion</option>
+                            <option value="moderate">Moderate expansion</option>
+                            <option value="detailed">Detailed expansion</option>
+                        </select>
+                    </div>
+                    <button class="btn-primary" id="ai-expand-btn">Expand Text</button>
+                    <div class="ai-result hidden" id="ai-expand-result"></div>
+                </div>
+                
+                <div class="ai-content" id="ai-translate">
+                    <div class="form-group">
+                        <label for="ai-translate-text">Text to translate</label>
+                        <textarea id="ai-translate-text" rows="5" placeholder="Paste the text you want to translate"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="ai-translate-from">From</label>
+                        <select id="ai-translate-from">
+                            <option value="auto">Detect language</option>
+                            <option value="en">English</option>
+                            <option value="es">Spanish</option>
+                            <option value="fr">French</option>
+                            <option value="de">German</option>
+                            <option value="pt">Portuguese</option>
+                            <option value="zh">Chinese</option>
+                            <option value="ja">Japanese</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="ai-translate-to">To</label>
+                        <select id="ai-translate-to">
+                            <option value="en">English</option>
+                            <option value="es">Spanish</option>
+                            <option value="fr">French</option>
+                            <option value="de">German</option>
+                            <option value="pt">Portuguese</option>
+                            <option value="zh">Chinese</option>
+                            <option value="ja">Japanese</option>
+                        </select>
+                    </div>
+                    <button class="btn-primary" id="ai-translate-btn">Translate</button>
+                    <div class="ai-result hidden" id="ai-translate-result"></div>
+                </div>
+                
+                <div class="ai-content" id="ai-code">
+                    <div class="form-group">
+                        <label for="ai-code-text">Code or description</label>
+                        <textarea id="ai-code-text" rows="5" placeholder="Paste code or describe what you want"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="ai-code-action">Action</label>
+                        <select id="ai-code-action">
+                            <option value="explain">Explain code</option>
+                            <option value="optimize">Optimize code</option>
+                            <option value="debug">Debug code</option>
+                            <option value="convert">Convert language</option>
+                            <option value="generate">Generate code</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="ai-code-language-container">
+                        <label for="ai-code-language">Language</label>
+                        <select id="ai-code-language">
+                            <option value="javascript">JavaScript</option>
+                            <option value="python">Python</option>
+                            <option value="java">Java</option>
+                            <option value="csharp">C#</option>
+                            <option value="php">PHP</option>
+                            <option value="ruby">Ruby</option>
+                            <option value="go">Go</option>
+                            <option value="rust">Rust</option>
+                            <option value="typescript">TypeScript</option>
+                            <option value="swift">Swift</option>
+                        </select>
+                    </div>
+                    <button class="btn-primary" id="ai-code-btn">Process Code</button>
+                    <div class="ai-result hidden" id="ai-code-result"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary modal-close">Close</button>
+                <button class="btn-primary" id="ai-apply-btn" disabled>Apply to Editor</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toast-container"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/5.0.2/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.1/purify.min.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
