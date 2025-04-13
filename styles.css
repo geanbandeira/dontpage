@@ -106,6 +106,78 @@ p {
     margin-bottom: 1rem;
 }
 
+/* Adicione estas regras ao seu CSS existente */
+
+/* Menu Mobile */
+#mobile-menu-btn {
+    display: none;
+    background: none;
+    border: none;
+    color: var(--color-text);
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0.5rem;
+}
+
+/* Sidebar como overlay em mobile */
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 300px;
+    z-index: 1000;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    background-color: var(--color-accent);
+    border-right: 1px solid var(--color-border);
+}
+
+/* Quando o menu está visível */
+.sidebar.visible {
+    transform: translateX(0);
+    box-shadow: 5px 0 15px rgba(0,0,0,0.2);
+}
+
+/* Overlay quando o menu está aberto */
+.menu-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 999;
+    display: none;
+}
+
+/* Ajustes para mobile */
+@media (max-width: 1024px) {
+    #mobile-menu-btn {
+        display: block;
+    }
+    
+    .sidebar {
+        transform: translateX(-100%);
+    }
+    
+    .sidebar.visible {
+        transform: translateX(0);
+    }
+    
+    .sidebar-toggle {
+        display: none;
+    }
+    
+    .main-nav {
+        display: none;
+    }
+    
+    .menu-overlay.visible {
+        display: block;
+    }
+}
+
 a {
     color: var(--color-primary);
     text-decoration: none;
