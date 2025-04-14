@@ -267,7 +267,6 @@ body {
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    transition: margin-left 0.3s ease;
 }
 
 .editor-toolbar {
