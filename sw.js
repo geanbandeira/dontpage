@@ -4,7 +4,7 @@ const ASSETS = [
     '/index.html',
     '/styles.css',
     '/app.js',
-    'sw.js',
+    '/sw.js',
     'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css',
     'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/base16/dracula.min.css',
     'https://cdnjs.cloudflare.com/ajax/libs/marked/5.0.2/marked.min.js',
