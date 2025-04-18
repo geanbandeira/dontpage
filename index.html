@@ -1,15 +1,43 @@
 <!DOCTYPE html>
 <html lang="pt-BR" data-theme="system">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DontPage | Editor de Texto Online Grátis</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/base16/dracula.min.css">
-    <link rel="stylesheet" href="/css/main.css">
-    <link rel="manifest" href="/manifest.json">
+    <title>DontPage - Editor de Texto Online Avançado | Salve e Compartilhe Notas Instantâneas</title>
+    <meta name="description"
+        content="DontPage é o editor de texto online mais rápido e simples. Crie, edite e compartilhe notas em tempo real sem cadastro. Suporte para Markdown, exportação para PDF e colaboração em equipe.">
+    <meta name="keywords"
+        content="editor de texto online, bloco de notas web, dontpad alternativo, markdown online, editor código online, salvar texto online, compartilhar notas, ferramenta dev, escrever online">
+    <meta name="robots" content="index, follow, max-image-preview:large">
+    <meta name="googlebot" content="index,follow">
+    <meta property="og:title" content="DontPage - Editor de Texto Online Poderoso e Simples">
+    <meta property="og:description"
+        content="Editor de texto online gratuito para desenvolvedores, escritores e estudantes. Sem cadastro necessário.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://dontpage.com">
+    <meta property="og:image" content="https://dontpage.com/images/og-image.jpg">
+    <meta property="og:site_name" content="DontPage">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:creator" content="@dontpage">
+    <meta name="theme-color" content="#2d3748">
     <script src="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.0.3"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.0.0/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <!-- Adicionar após as meta tags -->
+    <link rel="canonical" href="https://dontpage.com" />
+    <link rel="alternate" hreflang="pt" href="https://dontpage.com/pt" />
+    <link rel="alternate" hreflang="es" href="https://dontpage.com/es" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+
+    <link rel="preload" href="/css/main.css" as="style">
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" as="style">
 </head>
+
 <body>
     <div class="app-container">
         <header class="app-header">
@@ -74,6 +102,12 @@
                         <button class="btn-sidebar" id="export-md">
                             <i class="ph ph-file-text"></i> Export as Markdown
                         </button>
+                        <button class="btn-sidebar" id="export-txt">
+                            <i class="ph ph-file"></i> Export as Text
+                        </button>
+                        <button class="btn-sidebar" id="export-html">
+                            <i class="ph ph-code"></i> Export as HTML
+                        </button>
                     </div>
 
                     <div class="sidebar-section">
@@ -81,6 +115,18 @@
                         <button class="btn-sidebar" id="copy-link">
                             <i class="ph ph-link"></i> Copy Page Link
                         </button>
+                        <div class="form-group share-options">
+                            <label>Sharing Mode</label>
+                            <select id="share-mode">
+                                <option value="read-write">Read & Write</option>
+                                <option value="read-only">Read Only</option>
+                                <option value="private">Private</option>
+                            </select>
+                        </div>
+                        <div class="collaborators">
+                            <h5>Active Collaborators</h5>
+                            <ul id="collaborators-list"></ul>
+                        </div>
                     </div>
 
                     <div class="sidebar-section">
@@ -91,6 +137,17 @@
                                 <option value="default">Default</option>
                                 <option value="dark">Dark</option>
                                 <option value="light">Light</option>
+                                <option value="solarized">Solarized</option>
+                                <option value="monokai">Monokai</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Font Size</label>
+                            <select id="font-size">
+                                <option value="12px">Small</option>
+                                <option value="14px" selected>Medium</option>
+                                <option value="16px">Large</option>
+                                <option value="18px">Extra Large</option>
                             </select>
                         </div>
                         <div class="form-group">
@@ -98,6 +155,13 @@
                                 <input type="checkbox" id="auto-save-toggle" checked>
                                 <span class="checkmark"></span>
                                 Auto-save changes
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="checkbox-container">
+                                <input type="checkbox" id="sync-scroll-toggle" checked>
+                                <span class="checkmark"></span>
+                                Sync scroll in preview
                             </label>
                         </div>
                     </div>
@@ -143,6 +207,9 @@
                         <button class="btn-toolbar" data-command="link" title="Insert Link">
                             <i class="ph ph-link"></i>
                         </button>
+                        <button class="btn-toolbar" data-command="image" title="Insert Image">
+                            <i class="ph ph-image"></i>
+                        </button>
                         <div class="toolbar-separator"></div>
                         <button class="btn-toolbar" data-command="undo" title="Undo (Ctrl+Z)">
                             <i class="ph ph-arrow-counter-clockwise"></i>
@@ -170,6 +237,7 @@
                     <div class="statusbar-left">
                         <span id="cursor-position">Ln 1, Col 1</span>
                         <span id="indentation">Spaces: 4</span>
+                        <span id="connection-status"><i class="ph ph-plug-connected"></i> Connected</span>
                     </div>
                     <div class="statusbar-right">
                         <span id="last-saved">Never saved</span>
@@ -192,6 +260,16 @@
                     <label for="new-page-name">Page Name</label>
                     <input type="text" id="new-page-name" placeholder="my-awesome-page">
                 </div>
+                <div class="form-group">
+                    <label for="new-page-template">Template</label>
+                    <select id="new-page-template">
+                        <option value="blank">Blank</option>
+                        <option value="markdown">Markdown Template</option>
+                        <option value="html">HTML Template</option>
+                        <option value="todo">To-Do List</option>
+                        <option value="notes">Meeting Notes</option>
+                    </select>
+                </div>
             </div>
             <div class="modal-footer">
                 <button class="btn-secondary modal-close">Cancel</button>
@@ -200,8 +278,47 @@
         </div>
     </div>
 
-    <div class="toast-container" id="toast-container"></div>
+    <div class="modal" id="image-upload-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Insert Image</h3>
+                <button class="btn-icon modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="image-url">Image URL</label>
+                    <input type="text" id="image-url" placeholder="https://example.com/image.jpg">
+                </div>
+                <div class="form-group">
+                    <label for="image-upload">Or Upload Image</label>
+                    <input type="file" id="image-upload" accept="image/*">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary modal-close">Cancel</button>
+                <button class="btn-primary" id="insert-image-btn">Insert</button>
+            </div>
+        </div>
+    </div>
 
-    <script type="module" src="/js/main.js"></script>
+    <div class="toast-container" id="toast-container"></div>
+    <script type="application/ld+json">
+        {
+          "@context": "https://schema.org",
+          "@type": "WebApplication",
+          "name": "DontPage",
+          "description": "Editor de texto online avançado com suporte a Markdown e colaboração em tempo real",
+          "url": "https://dontpage.com",
+          "applicationCategory": "DeveloperApplication",
+          "operatingSystem": "Web Browser",
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+          }
+        }
+        </script>
+    <script src="/js/main.js"></script>
 </body>
+
 </html>
