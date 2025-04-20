@@ -5,28 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Redirecionamento - DontPage</title>
     <script>
-        // Verifica se estamos em uma página específica (não é a raiz nem editor.html)
-        const path = window.location.pathname;
-        
-        // Se for a página raiz, não faz nada (deixa o 404 normal aparecer)
-        if (path !== '/' && !path.startsWith('/editor.html')) {
-            // Pega o nome da página da URL (removendo a barra inicial)
-            const pageName = path.substring(1);
+        // Verifica se o redirecionamento já ocorreu para evitar loops
+        if (!sessionStorage.getItem('redirected')) {
+            const path = window.location.pathname;
             
-            // Verifica se o nome da página é válido
-            if (/^[a-z0-9-]+$/i.test(pageName)) {
-                // Redireciona para o editor com hash
-                window.location.href = `/editor.html#${pageName}`;
-            } else {
-                // Se não for um nome válido, redireciona para a página inicial
-                window.location.href = '/';
+            // Verifica se é uma URL de página (/alguma-coisa) que não seja editor.html
+            if (path !== '/' && !path.startsWith('/editor.html') && !path.startsWith('/assets/')) {
+                const pageName = path.substring(1).replace(/[^a-z0-9-]/g, '');
+                
+                if (pageName) {
+                    // Marca que o redirecionamento ocorreu
+                    sessionStorage.setItem('redirected', 'true');
+                    
+                    // Redireciona para o editor com hash
+                    window.location.replace(`/editor.html#${pageName}`);
+                    document.body.innerHTML = '<h1>Redirecionando...</h1>';
+                }
             }
+        } else {
+            sessionStorage.removeItem('redirected');
         }
     </script>
 </head>
 <body>
     <h1>Página não encontrada</h1>
-    <p>Você será redirecionado automaticamente...</p>
-    <p>Se o redirecionamento não funcionar, <a href="/">clique aqui para voltar à página inicial</a>.</p>
+    <p>Se você estava tentando acessar uma página de texto, <a href="/">clique aqui para criar uma nova</a>.</p>
 </body>
 </html>
