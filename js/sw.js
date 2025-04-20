@@ -1,37 +1,68 @@
 const CACHE_NAME = 'dontpage-v1';
-const ASSETS = [
-    '/',
-    '/index.html',
-    '/js/main.js',
-    '/css/main.css'
+const urlsToCache = [
+  '/',
+  '/index.html',
+  '/editor.html',
+  '/js/main.js',
+  '/styles.css',
+  'https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js',
+  'https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js'
 ];
 
-self.addEventListener('install', (event) => {
-    event.waitUntil(
-        caches.open(CACHE_NAME)
-            .then((cache) => cache.addAll(ASSETS))
+self.addEventListener('install', event => {
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then(cache => {
+        return cache.addAll(urlsToCache);
+      })
+  );
+});
+
+self.addEventListener('fetch', event => {
+  event.respondWith(
+    caches.match(event.request)
+      .then(response => {
+        // Cache hit - return response
+        if (response) {
+          return response;
+        }
+        
+        // Clone the request
+        const fetchRequest = event.request.clone();
+        
+        return fetch(fetchRequest).then(
+          response => {
+            // Check if we received a valid response
+            if(!response || response.status !== 200 || response.type !== 'basic') {
+              return response;
+            }
+            
+            // Clone the response
+            const responseToCache = response.clone();
+            
+            caches.open(CACHE_NAME)
+              .then(cache => {
+                cache.put(event.request, responseToCache);
+              });
+              
+            return response;
+          }
+        );
+      })
     );
 });
 
-self.addEventListener('fetch', (event) => {
-    // Para todas as requisições de navegação, retorne o index.html
-    if (event.request.mode === 'navigate') {
-        event.respondWith(caches.match('/index.html'));
-        return;
-    }
-    
-    // Para outros recursos, tente a rede primeiro, depois o cache
-    event.respondWith(
-        fetch(event.request)
-            .then((response) => {
-                // Faz cache da resposta
-                const responseToCache = response.clone();
-                caches.open(CACHE_NAME)
-                    .then((cache) => cache.put(event.request, responseToCache));
-                return response;
-            })
-            .catch(() => {
-                return caches.match(event.request);
-            })
-    );
+self.addEventListener('activate', event => {
+  const cacheWhitelist = [CACHE_NAME];
+  event.waitUntil(
+    caches.keys().then(cacheNames => {
+      return Promise.all(
+        cacheNames.map(cacheName => {
+          if (cacheWhitelist.indexOf(cacheName) === -1) {
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    })
+  );
 });
