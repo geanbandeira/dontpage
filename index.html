@@ -1,285 +1,56 @@
 <!DOCTYPE html>
-<html lang="pt-BR" data-theme="system">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DontPage | Editor de Texto Online Grátis</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/base16/dracula.min.css">
-    <link rel="stylesheet" href="/css/main.css">
-    <link rel="manifest" href="/manifest.json">
-    <script src="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.0.3"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.0.0/marked.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    <title>DontPage</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        #editor-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        #page-name {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        #editor {
+            width: 100%;
+            height: 500px;
+            border: 1px solid #ddd;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 16px;
+            resize: none;
+        }
+        .info {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #666;
+        }
+    </style>
 </head>
 <body>
-    <div class="app-container">
-        <header class="app-header">
-            <div class="header-left">
-                <button id="mobile-menu-btn" class="btn-icon"><i class="ph ph-list"></i></button>
-                <h1 class="logo">
-                    <span class="logo-icon"><i class="ph ph-file-text"></i></span>
-                    <span class="logo-text">DontPage</span>
-                </h1>
-                <nav class="main-nav">
-                    <ul>
-                        <li><a href="#" id="new-page-btn"><i class="ph ph-plus"></i> <span>New</span></a></li>
-                        <li><a href="#" id="my-pages-btn"><i class="ph ph-folder"></i> <span>My Pages</span></a></li>
-                        <li><a href="#" id="features-btn"><i class="ph ph-star"></i> <span>Features</span></a></li>
-                    </ul>
-                </nav>
-            </div>
-            <div class="header-right">
-                <div class="search-box">
-                    <input type="text" placeholder="Search pages..." id="search-input">
-                    <button id="search-btn"><i class="ph ph-magnifying-glass"></i></button>
-                </div>
-                <div class="user-actions">
-                    <button class="btn-icon" id="theme-toggle" title="Toggle theme">
-                        <i class="ph ph-moon"></i>
-                    </button>
-                    <button class="btn-icon" id="fullscreen-btn" title="Toggle fullscreen">
-                        <i class="ph ph-arrows-out"></i>
-                    </button>
-                    <button class="btn-icon" id="account-btn" title="Account">
-                        <i class="ph ph-user-circle"></i>
-                    </button>
-                </div>
-            </div>
-        </header>
-
-        <div class="editor-container">
-            <aside class="sidebar">
-                <div class="sidebar-header">
-                    <h3>Page Actions</h3>
-                    <button class="btn-icon sidebar-toggle" id="sidebar-toggle">
-                        <i class="ph ph-caret-left"></i>
-                    </button>
-                </div>
-                <div class="sidebar-content">
-                    <div class="sidebar-section">
-                        <h4>Current Page</h4>
-                        <div class="page-info">
-                            <input type="text" id="page-name" placeholder="Page name...">
-                            <div class="page-meta">
-                                <span id="page-date">Created: Just now</span>
-                                <span id="page-size">0 chars</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="sidebar-section">
-                        <h4>Export</h4>
-                        <button class="btn-sidebar" id="export-pdf">
-                            <i class="ph ph-file-pdf"></i> Export as PDF
-                        </button>
-                        <button class="btn-sidebar" id="export-md">
-                            <i class="ph ph-file-text"></i> Export as Markdown
-                        </button>
-                        <button class="btn-sidebar" id="export-txt">
-                            <i class="ph ph-file"></i> Export as Text
-                        </button>
-                        <button class="btn-sidebar" id="export-html">
-                            <i class="ph ph-code"></i> Export as HTML
-                        </button>
-                    </div>
-
-                    <div class="sidebar-section">
-                        <h4>Share</h4>
-                        <button class="btn-sidebar" id="copy-link">
-                            <i class="ph ph-link"></i> Copy Page Link
-                        </button>
-                        <div class="form-group share-options">
-                            <label>Sharing Mode</label>
-                            <select id="share-mode">
-                                <option value="read-write">Read & Write</option>
-                                <option value="read-only">Read Only</option>
-                                <option value="private">Private</option>
-                            </select>
-                        </div>
-                        <div class="collaborators">
-                            <h5>Active Collaborators</h5>
-                            <ul id="collaborators-list"></ul>
-                        </div>
-                    </div>
-
-                    <div class="sidebar-section">
-                        <h4>Appearance</h4>
-                        <div class="form-group">
-                            <label>Editor Theme</label>
-                            <select id="editor-theme">
-                                <option value="default">Default</option>
-                                <option value="dark">Dark</option>
-                                <option value="light">Light</option>
-                                <option value="solarized">Solarized</option>
-                                <option value="monokai">Monokai</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Font Size</label>
-                            <select id="font-size">
-                                <option value="12px">Small</option>
-                                <option value="14px" selected>Medium</option>
-                                <option value="16px">Large</option>
-                                <option value="18px">Extra Large</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label class="checkbox-container">
-                                <input type="checkbox" id="auto-save-toggle" checked>
-                                <span class="checkmark"></span>
-                                Auto-save changes
-                            </label>
-                        </div>
-                        <div class="form-group">
-                            <label class="checkbox-container">
-                                <input type="checkbox" id="sync-scroll-toggle" checked>
-                                <span class="checkmark"></span>
-                                Sync scroll in preview
-                            </label>
-                        </div>
-                    </div>
-                </div>
-            </aside>
-
-            <main class="editor-main">
-                <div class="editor-toolbar">
-                    <div class="toolbar-group">
-                        <button class="btn-toolbar" data-command="bold" title="Bold (Ctrl+B)">
-                            <i class="ph ph-bold"></i>
-                        </button>
-                        <button class="btn-toolbar" data-command="italic" title="Italic (Ctrl+I)">
-                            <i class="ph ph-italic"></i>
-                        </button>
-                        <button class="btn-toolbar" data-command="underline" title="Underline (Ctrl+U)">
-                            <i class="ph ph-underline"></i>
-                        </button>
-                        <div class="toolbar-separator"></div>
-                        <button class="btn-toolbar" data-command="heading1" title="Heading 1">
-                            <i class="ph ph-text-h-one"></i>
-                        </button>
-                        <button class="btn-toolbar" data-command="heading2" title="Heading 2">
-                            <i class="ph ph-text-h-two"></i>
-                        </button>
-                        <div class="toolbar-separator"></div>
-                        <button class="btn-toolbar" data-command="ul" title="Bullet List">
-                            <i class="ph ph-list-bullets"></i>
-                        </button>
-                        <button class="btn-toolbar" data-command="ol" title="Numbered List">
-                            <i class="ph ph-list-numbers"></i>
-                        </button>
-                        <div class="toolbar-separator"></div>
-                        <button class="btn-toolbar" data-command="quote" title="Blockquote">
-                            <i class="ph ph-quotes"></i>
-                        </button>
-                        <button class="btn-toolbar" data-command="code" title="Code Block">
-                            <i class="ph ph-code"></i>
-                        </button>
-                    </div>
-
-                    <div class="toolbar-group">
-                        <button class="btn-toolbar" data-command="link" title="Insert Link">
-                            <i class="ph ph-link"></i>
-                        </button>
-                        <button class="btn-toolbar" data-command="image" title="Insert Image">
-                            <i class="ph ph-image"></i>
-                        </button>
-                        <div class="toolbar-separator"></div>
-                        <button class="btn-toolbar" data-command="undo" title="Undo (Ctrl+Z)">
-                            <i class="ph ph-arrow-counter-clockwise"></i>
-                        </button>
-                        <button class="btn-toolbar" data-command="redo" title="Redo (Ctrl+Y)">
-                            <i class="ph ph-arrow-clockwise"></i>
-                        </button>
-                        <div class="toolbar-separator"></div>
-                        <button class="btn-toolbar" id="preview-btn" title="Toggle Preview">
-                            <i class="ph ph-eye"></i>
-                        </button>
-                        <button class="btn-toolbar" id="word-count-btn" title="Word Count">
-                            <span id="word-count">0</span>
-                        </button>
-                    </div>
-                </div>
-
-                <div class="editor-content">
-                    <div class="editor-line-numbers" id="line-numbers">1</div>
-                    <div class="editor-textarea" id="editor" contenteditable="true" spellcheck="false"></div>
-                    <div class="editor-preview hidden" id="preview"></div>
-                </div>
-
-                <div class="editor-statusbar">
-                    <div class="statusbar-left">
-                        <span id="cursor-position">Ln 1, Col 1</span>
-                        <span id="indentation">Spaces: 4</span>
-                        <span id="connection-status"><i class="ph ph-plug-connected"></i> Connected</span>
-                    </div>
-                    <div class="statusbar-right">
-                        <span id="last-saved">Never saved</span>
-                        <button class="btn-small" id="save-now-btn">Save Now</button>
-                    </div>
-                </div>
-            </main>
+    <div id="editor-container">
+        <div id="page-name">dontpage/<span id="page-id-display">home</span></div>
+        <textarea id="editor" spellcheck="false"></textarea>
+        <div class="info">
+            <span id="last-saved">Não salvo ainda</span>
+            <span id="char-count">0 caracteres</span>
         </div>
     </div>
 
-    <!-- Modals -->
-    <div class="modal" id="new-page-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Create New Page</h3>
-                <button class="btn-icon modal-close">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label for="new-page-name">Page Name</label>
-                    <input type="text" id="new-page-name" placeholder="my-awesome-page">
-                </div>
-                <div class="form-group">
-                    <label for="new-page-template">Template</label>
-                    <select id="new-page-template">
-                        <option value="blank">Blank</option>
-                        <option value="markdown">Markdown Template</option>
-                        <option value="html">HTML Template</option>
-                        <option value="todo">To-Do List</option>
-                        <option value="notes">Meeting Notes</option>
-                    </select>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn-secondary modal-close">Cancel</button>
-                <button class="btn-primary" id="create-page-btn">Create</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal" id="image-upload-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Insert Image</h3>
-                <button class="btn-icon modal-close">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label for="image-url">Image URL</label>
-                    <input type="text" id="image-url" placeholder="https://example.com/image.jpg">
-                </div>
-                <div class="form-group">
-                    <label for="image-upload">Or Upload Image</label>
-                    <input type="file" id="image-upload" accept="image/*">
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn-secondary modal-close">Cancel</button>
-                <button class="btn-primary" id="insert-image-btn">Insert</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="toast-container" id="toast-container"></div>
-
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
     <script src="/js/main.js"></script>
 </body>
 </html>
