@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redirecionamento - DontPage</title>
+    <script>
+        // Verifica se estamos em uma página específica (não é a raiz nem editor.html)
+        const path = window.location.pathname;
+        
+        // Se for a página raiz, não faz nada (deixa o 404 normal aparecer)
+        if (path !== '/' && !path.startsWith('/editor.html')) {
+            // Pega o nome da página da URL (removendo a barra inicial)
+            const pageName = path.substring(1);
+            
+            // Verifica se o nome da página é válido
+            if (/^[a-z0-9-]+$/i.test(pageName)) {
+                // Redireciona para o editor com hash
+                window.location.href = `/editor.html#${pageName}`;
+            } else {
+                // Se não for um nome válido, redireciona para a página inicial
+                window.location.href = '/';
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>Página não encontrada</h1>
+    <p>Você será redirecionado automaticamente...</p>
+    <p>Se o redirecionamento não funcionar, <a href="/">clique aqui para voltar à página inicial</a>.</p>
+</body>
+</html>
