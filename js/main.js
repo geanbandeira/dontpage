@@ -27,34 +27,25 @@ let currentPageId = 'home';
 let lastSavedTime = null;
 let saveTimer = null;
 
-// Substitua a função getPageIdFromUrl por:
+// Função para obter o ID da página da URL
 function getPageIdFromUrl() {
-    // Tenta primeiro pelo hash (GitHub Pages)
     if (window.location.hash) {
-        return window.location.hash.substring(1);
+        return window.location.hash.substring(1) || 'home';
     }
-    // Se não, tenta pelo path normal (local/dev)
-    const path = window.location.pathname.substring(1);
-    return path || 'home';
+    return 'home';
 }
 
-// E a função updateUrl por:
+// Função para atualizar o URL
 function updateUrl(pageId) {
-    // Para GitHub Pages, usa hash
-    if (window.location.host.includes('github.io')) {
-        window.location.hash = pageId;
-    } else {
-        // Para desenvolvimento local, usa path normal
-        const url = new URL(window.location.origin);
-        url.pathname = pageId;
-        window.history.pushState({ pageId }, '', url);
-    }
+    window.location.hash = pageId;
     updateShareUrl();
 }
+
 // Função para atualizar o URL de compartilhamento
 function updateShareUrl() {
     if (pageUrl) {
-        pageUrl.value = window.location.href;
+        const url = window.location.href.replace('/editor.html', '');
+        pageUrl.value = url;
     }
 }
 
@@ -148,11 +139,9 @@ document.addEventListener('DOMContentLoaded', () => {
             debounceSave();
         });
         
-        // Lidar com mudanças de URL (back/forward)
-        window.addEventListener('popstate', (event) => {
-            if (event.state && event.state.pageId) {
-                loadPage(event.state.pageId);
-            }
+        // Lidar com mudanças de hash (back/forward)
+        window.addEventListener('hashchange', () => {
+            loadPage(getPageIdFromUrl());
         });
 
         // Copiar URL
@@ -171,7 +160,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (shareWhatsappBtn) {
             shareWhatsappBtn.addEventListener('click', (e) => {
                 e.preventDefault();
-                const url = encodeURIComponent(window.location.href);
+                const url = encodeURIComponent(pageUrl.value);
                 window.open(`https://wa.me/?text=${url}`, '_blank');
             });
         }
