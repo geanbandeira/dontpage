@@ -10,22 +10,21 @@ const firebaseConfig = {
 };
 
 // Inicialização do Firebase
-firebase.initializeApp(firebaseConfig);
-const database = firebase.database();
+function initializeFirebase() {
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+    return firebase.database();
+}
 
 // Elementos DOM
-const editor = document.getElementById('editor');
-const pageIdDisplay = document.getElementById('page-id-display');
-const lastSaved = document.getElementById('last-saved');
-const charCount = document.getElementById('char-count');
-const pageUrl = document.getElementById('page-url');
-const copyUrlBtn = document.getElementById('copy-url');
-const shareWhatsappBtn = document.getElementById('share-whatsapp');
+let editor, pageIdDisplay, lastSaved, charCount, pageUrl, copyUrlBtn, shareWhatsappBtn, newPageBtn;
 
 // Estado da aplicação
 let currentPageId = 'home';
 let lastSavedTime = null;
 let saveTimer = null;
+let database;
 
 // Função para obter o ID da página da URL
 function getPageIdFromUrl() {
@@ -52,30 +51,35 @@ function updateShareUrl() {
 // Função para carregar uma página
 function loadPage(pageId) {
     currentPageId = pageId.toLowerCase().replace(/[^a-z0-9-]/g, '') || 'home';
-    pageIdDisplay.textContent = currentPageId;
+    
+    if (pageIdDisplay) pageIdDisplay.textContent = currentPageId;
     updateUrl(currentPageId);
     
     const pageRef = database.ref(`pages/${currentPageId}`);
     
     pageRef.on('value', (snapshot) => {
         const data = snapshot.val();
-        if (data) {
-            editor.value = data.content || '';
-            lastSavedTime = data.updatedAt;
-            updateLastSaved();
-        } else {
-            editor.value = '';
-            lastSavedTime = null;
-            lastSaved.textContent = 'Não salvo ainda';
+        if (editor) {
+            if (data) {
+                editor.value = data.content || '';
+                lastSavedTime = data.updatedAt;
+                updateLastSaved();
+            } else {
+                editor.value = '';
+                lastSavedTime = null;
+                if (lastSaved) lastSaved.textContent = 'Não salvo ainda';
+            }
+            updateCharCount();
         }
-        updateCharCount();
     });
     
-    setTimeout(() => editor.focus(), 100);
+    if (editor) setTimeout(() => editor.focus(), 100);
 }
 
 // Função para salvar a página
 function savePage() {
+    if (!editor) return;
+    
     const content = editor.value;
     const pageData = {
         content: content,
@@ -94,6 +98,8 @@ function savePage() {
 
 // Função para atualizar o status "Último salvamento"
 function updateLastSaved() {
+    if (!lastSaved) return;
+    
     if (!lastSavedTime) {
         lastSaved.textContent = 'Não salvo ainda';
         return;
@@ -115,6 +121,8 @@ function updateLastSaved() {
 
 // Função para atualizar a contagem de caracteres
 function updateCharCount() {
+    if (!editor || !charCount) return;
+    
     const count = editor.value.length;
     charCount.textContent = `${count} caractere${count !== 1 ? 's' : ''}`;
 }
@@ -125,39 +133,99 @@ function debounceSave() {
     saveTimer = setTimeout(savePage, 2000);
 }
 
-// Inicialização
-document.addEventListener('DOMContentLoaded', () => {
+// Criar nova página
+function createNewPage() {
+    const newPageName = prompt('Digite um nome para a nova página:');
+    if (newPageName) {
+        const cleanName = newPageName.toLowerCase().replace(/[^a-z0-9-]/g, '');
+        if (cleanName) {
+            window.location.href = `/${cleanName}`;
+        } else {
+            alert('Use apenas letras, números e hífens');
+        }
+    }
+}
+
+// Inicialização do editor
+function initializePage() {
+    // Obter referências aos elementos DOM
+    editor = document.getElementById('editor');
+    pageIdDisplay = document.getElementById('page-id-display');
+    lastSaved = document.getElementById('last-saved');
+    charCount = document.getElementById('char-count');
+    pageUrl = document.getElementById('page-url');
+    copyUrlBtn = document.getElementById('copy-url');
+    shareWhatsappBtn = document.getElementById('share-whatsapp');
+    newPageBtn = document.getElementById('new-page');
+
+    // Inicializar Firebase
+    database = initializeFirebase();
+
+    // Carregar a página
+    loadPage(getPageIdFromUrl());
+    
+    // Configurar event listeners
     if (editor) {
-        loadPage(getPageIdFromUrl());
-        
         editor.addEventListener('input', () => {
             updateCharCount();
             debounceSave();
         });
-        
-        window.addEventListener('popstate', (event) => {
-            if (event.state && event.state.pageId) {
-                loadPage(event.state.pageId);
+    }
+    
+    window.addEventListener('popstate', (event) => {
+        if (event.state && event.state.pageId) {
+            loadPage(event.state.pageId);
+        }
+    });
+
+    if (copyUrlBtn) {
+        copyUrlBtn.addEventListener('click', () => {
+            pageUrl.select();
+            document.execCommand('copy');
+            copyUrlBtn.textContent = 'Copiado!';
+            setTimeout(() => {
+                copyUrlBtn.textContent = 'Copiar URL';
+            }, 2000);
+        });
+    }
+
+    if (shareWhatsappBtn) {
+        shareWhatsappBtn.addEventListener('click', () => {
+            const url = encodeURIComponent(pageUrl.value);
+            window.open(`https://wa.me/?text=${url}`, '_blank');
+        });
+    }
+
+    if (newPageBtn) {
+        newPageBtn.addEventListener('click', createNewPage);
+    }
+}
+
+// Inicialização para páginas regulares (index.html)
+document.addEventListener('DOMContentLoaded', () => {
+    if (document.getElementById('create-page')) {
+        // Estamos na página inicial
+        document.getElementById('create-page').addEventListener('click', () => {
+            const pageName = document.getElementById('page-name').value.trim();
+            if (pageName) {
+                const cleanName = pageName.toLowerCase().replace(/[^a-z0-9-]/g, '');
+                if (cleanName) {
+                    window.location.href = `/${cleanName}`;
+                } else {
+                    alert('Use apenas letras, números e hífens');
+                }
             }
         });
 
-        if (copyUrlBtn) {
-            copyUrlBtn.addEventListener('click', () => {
-                pageUrl.select();
-                document.execCommand('copy');
-                copyUrlBtn.textContent = 'Copiado!';
-                setTimeout(() => {
-                    copyUrlBtn.textContent = 'Copiar URL';
-                }, 2000);
-            });
-        }
-
-        if (shareWhatsappBtn) {
-            shareWhatsappBtn.addEventListener('click', () => {
-                const url = encodeURIComponent(pageUrl.value);
-                window.open(`https://wa.me/?text=${url}`, '_blank');
-            });
-        }
+        document.getElementById('page-name').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                document.getElementById('create-page').click();
+            }
+        });
+    } else if (window.location.pathname !== '/' && !window.location.pathname.includes('.')) {
+        // Estamos em uma página de conteúdo (/nome-da-pagina)
+        initializeFirebase();
+        initializePage();
     }
 });
 

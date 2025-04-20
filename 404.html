@@ -2,19 +2,161 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <script>
-        // Verifica se é uma URL de página (/pagina)
-        const path = window.location.pathname;
-        if (path !== '/' && !path.includes('.') && !path.startsWith('/editor.html')) {
-            const pageName = path.substring(1).replace(/[^a-z0-9-]/g, '');
-            if (pageName) {
-                // Redireciona para o editor com a página como hash
-                window.location.replace(`/editor.html#${pageName}`);
-            }
+    <title>Redirecionando...</title>
+    <script src="app.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: center;
+            padding: 2rem;
         }
-    </script>
+    </style>
 </head>
 <body>
-    <p>Redirecionando...</p>
+    <p>Carregando página...</p>
+    <script>
+        // Extrai o nome da página da URL
+        const path = window.location.pathname.substring(1);
+        const pageName = path.toLowerCase().replace(/[^a-z0-9-]/g, '');
+        
+        if (pageName) {
+            // Carrega o editor diretamente com a página especificada
+            loadEditorForPage(pageName);
+        } else {
+            window.location.replace('/');
+        }
+
+        function loadEditorForPage(pageId) {
+            // Verifica se já temos os scripts necessários
+            if (window.firebase) {
+                initializeEditor(pageId);
+            } else {
+                // Carrega os scripts necessários dinamicamente
+                const firebaseAppScript = document.createElement('script');
+                firebaseAppScript.src = 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js';
+                firebaseAppScript.onload = () => {
+                    const firebaseDatabaseScript = document.createElement('script');
+                    firebaseDatabaseScript.src = 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js';
+                    firebaseDatabaseScript.onload = () => {
+                        initializeFirebase();
+                        initializeEditor(pageId);
+                    };
+                    document.head.appendChild(firebaseDatabaseScript);
+                };
+                document.head.appendChild(firebaseAppScript);
+            }
+        }
+
+        function initializeEditor(pageId) {
+            // Cria a estrutura do editor dinamicamente
+            document.body.innerHTML = `
+                <div class="header">
+                    <div class="logo">DontPage</div>
+                    <button id="new-page">Nova Página</button>
+                </div>
+
+                <div class="page-info">
+                    <div id="page-id-display">${pageId}</div>
+                </div>
+
+                <textarea id="editor" placeholder="Digite seu conteúdo aqui..."></textarea>
+
+                <div class="status-bar">
+                    <div id="last-saved">Não salvo ainda</div>
+                    <div id="char-count">0 caracteres</div>
+                </div>
+
+                <div class="share-section">
+                    <h3>Compartilhar esta página</h3>
+                    <div class="share-controls">
+                        <input type="text" id="page-url" readonly>
+                        <button id="copy-url">Copiar URL</button>
+                        <button id="share-whatsapp">Compartilhar no WhatsApp</button>
+                    </div>
+                </div>
+            `;
+
+            // Adiciona os estilos
+            const style = document.createElement('style');
+            style.textContent = `
+                body {
+                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                    max-width: 800px;
+                    margin: 0 auto;
+                    padding: 2rem;
+                }
+                .header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 1rem;
+                }
+                .logo {
+                    font-size: 1.5rem;
+                    color: #2c3e50;
+                }
+                .page-info {
+                    margin-bottom: 1rem;
+                }
+                #editor {
+                    width: 100%;
+                    height: 400px;
+                    padding: 1rem;
+                    border: 1px solid #ddd;
+                    border-radius: 4px;
+                    font-family: monospace;
+                    font-size: 1rem;
+                    resize: vertical;
+                    margin-bottom: 1rem;
+                }
+                .status-bar {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-top: 1rem;
+                    color: #7f8c8d;
+                    font-size: 0.9rem;
+                }
+                .share-section {
+                    margin-top: 2rem;
+                    padding-top: 1rem;
+                    border-top: 1px solid #eee;
+                }
+                .share-controls {
+                    display: flex;
+                    gap: 0.5rem;
+                    margin-top: 0.5rem;
+                }
+                #page-url {
+                    flex-grow: 1;
+                    padding: 0.5rem;
+                    border: 1px solid #ddd;
+                    border-radius: 4px;
+                }
+                button {
+                    padding: 0.5rem 1rem;
+                    background: #3498db;
+                    color: white;
+                    border: none;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    font-size: 0.9rem;
+                }
+                button:hover {
+                    background: #2980b9;
+                }
+                #new-page {
+                    background: #2ecc71;
+                }
+                #new-page:hover {
+                    background: #27ae60;
+                }
+            `;
+            document.head.appendChild(style);
+
+            // Inicializa o editor
+            initializePage();
+        }
+    </script>
 </body>
 </html>

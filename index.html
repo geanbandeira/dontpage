@@ -3,82 +3,110 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DontPage - Crie páginas de texto instantâneas</title>
+    <title>DontPage - Editor</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             max-width: 800px;
             margin: 0 auto;
             padding: 2rem;
-            text-align: center;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
         }
         .logo {
-            font-size: 3rem;
-            margin-bottom: 1rem;
+            font-size: 1.5rem;
             color: #2c3e50;
         }
-        .subtitle {
-            color: #7f8c8d;
-            margin-bottom: 2rem;
+        .page-info {
+            margin-bottom: 1rem;
         }
-        .page-form {
-            margin: 2rem 0;
-        }
-        #page-name {
-            padding: 0.75rem;
-            width: 300px;
+        #editor {
+            width: 100%;
+            height: 400px;
+            padding: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: monospace;
             font-size: 1rem;
+            resize: vertical;
+            margin-bottom: 1rem;
+        }
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+        .share-section {
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid #eee;
+        }
+        .share-controls {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        #page-url {
+            flex-grow: 1;
+            padding: 0.5rem;
             border: 1px solid #ddd;
             border-radius: 4px;
         }
-        #create-page {
-            padding: 0.75rem 1.5rem;
+        button {
+            padding: 0.5rem 1rem;
             background: #3498db;
             color: white;
             border: none;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 1rem;
-            margin-left: 0.5rem;
-        }
-        footer {
-            margin-top: 3rem;
-            color: #7f8c8d;
             font-size: 0.9rem;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+        #new-page {
+            background: #2ecc71;
+        }
+        #new-page:hover {
+            background: #27ae60;
         }
     </style>
 </head>
 <body>
-    <div class="logo">DontPage</div>
-    <p class="subtitle">Crie páginas de texto instantâneas e compartilhe com qualquer pessoa</p>
-
-    <div class="page-form">
-        <input type="text" id="page-name" placeholder="Digite um nome para sua página" autofocus>
-        <button id="create-page">Criar Página</button>
+    <div class="header">
+        <div class="logo">DontPage</div>
+        <button id="new-page">Nova Página</button>
     </div>
 
-    <footer>
-        DontPage © 2025 - Todos os direitos reservados
-    </footer>
+    <div class="page-info">
+        <div id="page-id-display">home</div>
+    </div>
 
-    <script>
-        document.getElementById('create-page').addEventListener('click', () => {
-            const pageName = document.getElementById('page-name').value.trim();
-            if (pageName) {
-                const cleanName = pageName.toLowerCase().replace(/[^a-z0-9-]/g, '');
-                if (cleanName) {
-                    window.location.href = `/${cleanName}`;
-                } else {
-                    alert('Use apenas letras, números e hífens');
-                }
-            }
-        });
+    <textarea id="editor" placeholder="Digite seu conteúdo aqui..."></textarea>
 
-        document.getElementById('page-name').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                document.getElementById('create-page').click();
-            }
-        });
-    </script>
+    <div class="status-bar">
+        <div id="last-saved">Não salvo ainda</div>
+        <div id="char-count">0 caracteres</div>
+    </div>
+
+    <div class="share-section">
+        <h3>Compartilhar esta página</h3>
+        <div class="share-controls">
+            <input type="text" id="page-url" readonly>
+            <button id="copy-url">Copiar URL</button>
+            <button id="share-whatsapp">Compartilhar no WhatsApp</button>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>
