@@ -1,3 +1,11 @@
+// No início do seu main.js, antes de qualquer outra coisa
+if (sessionStorage.redirect) {
+    const redirect = sessionStorage.redirect;
+    delete sessionStorage.redirect;
+    window.history.replaceState(null, null, redirect);
+    loadPage(getPageIdFromUrl() || generatePageId());
+  }
+
 // Configuração do Firebase
 const firebaseConfig = {
     apiKey: "AIzaSyC0AkBC5batGFJ_UvF5hxwswl0HsWd417s",
@@ -223,6 +231,13 @@ function getPageIdFromUrl() {
 }
 
 function loadPage(pageId) {
+    // Limpa o ID da página de caracteres inválidos
+    pageId = pageId.replace(/[^a-z0-9-]/gi, '');
+    
+    if (!pageId) {
+        pageId = generatePageId();
+    }
+    
     state.currentPageId = pageId;
     const pageRef = database.ref(`pages/${pageId}`);
     
@@ -548,7 +563,7 @@ function copyPageLink() {
 
 function updateUrl(pageId) {
     const url = new URL(window.location.origin);
-    url.pathname = `/${pageId}`;
+    url.pathname = pageId;
     window.history.pushState({ pageId }, '', url);
 }
 

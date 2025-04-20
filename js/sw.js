@@ -37,25 +37,32 @@ self.addEventListener('fetch', (event) => {
     if (event.request.method !== 'GET') return;
     
     event.respondWith(
-        caches.match(event.request)
-            .then((response) => {
-                if (response) {
-                    return response;
-                }
-                
-                return fetch(event.request).then((response) => {
-                    if (!response || response.status !== 200 || response.type !== 'basic') {
-                        return response;
-                    }
-                    
-                    const responseToCache = response.clone();
-                    caches.open(CACHE_NAME)
-                        .then((cache) => {
-                            cache.put(event.request, responseToCache);
-                        });
-                    
-                    return response;
-                });
-            })
+      caches.match(event.request)
+        .then((response) => {
+          // Retorna do cache se encontrado
+          if (response) {
+            return response;
+          }
+          
+          // Para rotas de página, retorna o index.html
+          if (event.request.mode === 'navigate') {
+            return caches.match('/index.html');
+          }
+          
+          // Para outros recursos, tenta buscar da rede
+          return fetch(event.request).then((response) => {
+            if (!response || response.status !== 200 || response.type !== 'basic') {
+              return response;
+            }
+            
+            const responseToCache = response.clone();
+            caches.open(CACHE_NAME)
+              .then((cache) => {
+                cache.put(event.request, responseToCache);
+              });
+            
+            return response;
+          });
+        })
     );
-});
+  });
