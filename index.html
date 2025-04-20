@@ -3,153 +3,156 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DontPage</title>
+    <title>DontPage - Crie sua página de texto simples</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #f5f5f5;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
+            background-color: #f0f2f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
             text-align: center;
         }
-        
-        .logo {
-            font-size: 48px;
-            font-weight: bold;
-            margin-bottom: 30px;
-            color: #333;
+        header {
+            margin-bottom: 3rem;
         }
-        
-        .logo span {
-            color: #4285F4;
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            color: #2c3e50;
         }
-        
+        .subtitle {
+            font-size: 1.2rem;
+            color: #7f8c8d;
+            margin-bottom: 2rem;
+        }
         .page-form {
             background: white;
-            padding: 30px;
-            border-radius: 5px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            text-align: left;
+        }
+        input[type="text"] {
             width: 100%;
-            max-width: 500px;
-        }
-        
-        .page-input {
-            display: flex;
-            margin-bottom: 20px;
-        }
-        
-        .prefix {
-            padding: 10px 15px;
-            background: #f0f0f0;
+            padding: 0.75rem;
+            font-size: 1rem;
             border: 1px solid #ddd;
-            border-right: none;
-            border-radius: 4px 0 0 4px;
-            font-size: 18px;
+            border-radius: 4px;
+            box-sizing: border-box;
         }
-        
-        #page-input {
-            flex: 1;
-            padding: 10px;
-            font-size: 18px;
-            border: 1px solid #ddd;
-            border-left: none;
-            border-radius: 0 4px 4px 0;
-            outline: none;
-        }
-        
-        #page-input:focus {
-            border-color: #4285F4;
-        }
-        
-        #go-button {
-            background-color: #4285F4;
+        button {
+            background-color: #3498db;
             color: white;
             border: none;
-            padding: 10px 20px;
-            font-size: 18px;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
             border-radius: 4px;
             cursor: pointer;
             transition: background-color 0.3s;
         }
-        
-        #go-button:hover {
-            background-color: #3367D6;
+        button:hover {
+            background-color: #2980b9;
         }
-        
-        .info {
-            margin-top: 30px;
-            color: #666;
-            font-size: 14px;
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 3rem;
         }
-        
-        /* Estilo para a página do editor (quando não é a home) */
-        .editor-container {
-            display: none;
-            max-width: 800px;
-            margin: 20px auto;
+        .feature {
             background: white;
-            padding: 20px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            text-align: left;
         }
-        
-        #page-name {
-            font-size: 24px;
-            margin-bottom: 10px;
-            color: #333;
+        .feature h3 {
+            margin-top: 0;
+            color: #2c3e50;
         }
-        
-        #editor {
-            width: 100%;
-            height: 500px;
-            border: 1px solid #ddd;
-            padding: 10px;
-            font-family: monospace;
-            font-size: 16px;
-            resize: none;
-        }
-        
-        .editor-info {
-            margin-top: 10px;
-            font-size: 14px;
-            color: #666;
+        footer {
+            margin-top: 3rem;
+            color: #7f8c8d;
+            font-size: 0.9rem;
         }
     </style>
 </head>
 <body>
-    <!-- Página Inicial (mostrada apenas na raiz) -->
-    <div id="home-page">
-        <div class="logo">Dont<span>Page</span></div>
-        
+    <div class="container">
+        <header>
+            <h1>DontPage</h1>
+            <p class="subtitle">Crie páginas de texto simples e compartilhe com qualquer pessoa</p>
+        </header>
+
         <div class="page-form">
-            <div class="page-input">
-                <span class="prefix">dontpage.com/</span>
-                <input type="text" id="page-input" placeholder="digite-uma-pagina" autofocus>
+            <div class="form-group">
+                <label for="page-name">Nome da sua página:</label>
+                <input type="text" id="page-name" placeholder="Digite um nome para sua página (ex: minha-nota)" autofocus>
             </div>
-            <button id="go-button">Ir para a página</button>
+            <button id="create-page">Criar página</button>
         </div>
-        
-        <div class="info">
-            Digite um nome para a página acima e clique no botão para criar/editar
+
+        <div class="features">
+            <div class="feature">
+                <h3>Simples</h3>
+                <p>Nada de formatação complicada. Apenas texto puro e simples.</p>
+            </div>
+            <div class="feature">
+                <h3>Privado</h3>
+                <p>Não requer login. Qualquer pessoa com o link pode editar.</p>
+            </div>
+            <div class="feature">
+                <h3>Acessível</h3>
+                <p>Funciona em qualquer dispositivo e navegador moderno.</p>
+            </div>
         </div>
-    </div>
-    
-    <!-- Editor (mostrado quando acessa uma página específica) -->
-    <div id="editor-container" class="editor-container">
-        <div id="page-name">dontpage/<span id="page-id-display">home</span></div>
-        <textarea id="editor" spellcheck="false"></textarea>
-        <div class="editor-info">
-            <span id="last-saved">Não salvo ainda</span> | 
-            <span id="char-count">0 caracteres</span>
-        </div>
+
+        <footer>
+            <p>DontPage &copy; 2023 - Um simples editor de texto online</p>
+        </footer>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
-    <script src="/js/main.js"></script>
+    <script>
+        document.getElementById('create-page').addEventListener('click', function() {
+            const pageName = document.getElementById('page-name').value.trim().toLowerCase();
+            if (pageName) {
+                // Remove caracteres especiais e mantém apenas letras, números e hífens
+                const cleanPageName = pageName.replace(/[^a-z0-9-]/g, '');
+                if (cleanPageName) {
+                    window.location.href = `/${cleanPageName}`;
+                } else {
+                    alert('Por favor, use apenas letras, números e hífens no nome da página.');
+                }
+            } else {
+                alert('Por favor, digite um nome para a página.');
+            }
+        });
+
+        // Permite pressionar Enter para criar a página
+        document.getElementById('page-name').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('create-page').click();
+            }
+        });
+    </script>
+<script src="/js/main.js"></script>
+<script src="/js/sw.js"></script>
+
 </body>
 </html>

@@ -1,14 +1,19 @@
 <!DOCTYPE html>
 <html>
-  <head>
+<head>
     <meta charset="utf-8">
-    <title>Redirecting...</title>
+    <title>Redirecionando...</title>
     <script>
-      sessionStorage.redirect = location.pathname;
-      location.replace('/');
+        // Extrai o path da URL e redireciona para a página principal com o hash
+        const path = window.location.pathname.substring(1);
+        if (path) {
+            window.location.href = '/#' + path;
+        } else {
+            window.location.href = '/';
+        }
     </script>
-  </head>
-  <body>
-    <p>Redirecting...</p>
-  </body>
+</head>
+<body>
+    <p>Redirecionando...</p>
+</body>
 </html>
