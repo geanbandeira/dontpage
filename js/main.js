@@ -76,6 +76,12 @@ if (!window.location.pathname.includes('editor.html') && window.location.pathnam
     window.location.href = `/editor.html#${pageId}`;
 }
 // Função para carregar uma página
+
+// No início da função loadPage, adicione:
+if (window.location.pathname !== '/editor.html' && window.location.pathname !== '/') {
+    return; // Deixa o 404.html fazer o redirecionamento
+}
+
 function loadPage(pageId) {
     currentPageId = pageId.toLowerCase().replace(/[^a-z0-9-]/g, '') || 'home';
     pageIdDisplay.textContent = currentPageId;
