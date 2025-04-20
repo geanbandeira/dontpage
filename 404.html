@@ -1,34 +1,20 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Redirecionamento - DontPage</title>
+    <meta charset="utf-8">
     <script>
-        // Verifica se o redirecionamento já ocorreu para evitar loops
-        if (!sessionStorage.getItem('redirected')) {
-            const path = window.location.pathname;
-            
-            // Verifica se é uma URL de página (/alguma-coisa) que não seja editor.html
-            if (path !== '/' && !path.startsWith('/editor.html') && !path.startsWith('/assets/')) {
-                const pageName = path.substring(1).replace(/[^a-z0-9-]/g, '');
-                
-                if (pageName) {
-                    // Marca que o redirecionamento ocorreu
-                    sessionStorage.setItem('redirected', 'true');
-                    
-                    // Redireciona para o editor com hash
-                    window.location.replace(`/editor.html#${pageName}`);
-                    document.body.innerHTML = '<h1>Redirecionando...</h1>';
-                }
+        // Verifica se é uma URL de página (/pagina)
+        const path = window.location.pathname;
+        if (path !== '/' && !path.includes('.') && !path.startsWith('/editor.html')) {
+            const pageName = path.substring(1).replace(/[^a-z0-9-]/g, '');
+            if (pageName) {
+                // Redireciona para o editor com a página como hash
+                window.location.replace(`/editor.html#${pageName}`);
             }
-        } else {
-            sessionStorage.removeItem('redirected');
         }
     </script>
 </head>
 <body>
-    <h1>Página não encontrada</h1>
-    <p>Se você estava tentando acessar uma página de texto, <a href="/">clique aqui para criar uma nova</a>.</p>
+    <p>Redirecionando...</p>
 </body>
 </html>

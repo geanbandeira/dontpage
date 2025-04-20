@@ -3,67 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DontPage - Crie sua página de texto simples</title>
+    <title>DontPage - Crie páginas de texto instantâneas</title>
     <style>
-        /* (mantenha os estilos existentes) */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            text-align: center;
+        }
+        .logo {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #2c3e50;
+        }
+        .subtitle {
+            color: #7f8c8d;
+            margin-bottom: 2rem;
+        }
+        .page-form {
+            margin: 2rem 0;
+        }
+        #page-name {
+            padding: 0.75rem;
+            width: 300px;
+            font-size: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        #create-page {
+            padding: 0.75rem 1.5rem;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-left: 0.5rem;
+        }
+        footer {
+            margin-top: 3rem;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>DontPage</h1>
-            <p class="subtitle">Crie páginas de texto simples e compartilhe com qualquer pessoa</p>
-        </header>
+    <div class="logo">DontPage</div>
+    <p class="subtitle">Crie páginas de texto instantâneas e compartilhe com qualquer pessoa</p>
 
-        <div class="page-form">
-            <div class="form-group">
-                <label for="page-name">Nome da sua página:</label>
-                <input type="text" id="page-name" placeholder="Digite um nome para sua página (ex: minha-nota)" autofocus>
-            </div>
-            <button id="create-page">Criar página</button>
-        </div>
-
-        <div class="features">
-            <div class="feature">
-                <h3>Simples</h3>
-                <p>Nada de formatação complicada. Apenas texto puro e simples.</p>
-            </div>
-            <div class="feature">
-                <h3>Privado</h3>
-                <p>Não requer login. Qualquer pessoa com o link pode editar.</p>
-            </div>
-            <div class="feature">
-                <h3>Acessível</h3>
-                <p>Funciona em qualquer dispositivo e navegador moderno.</p>
-            </div>
-        </div>
-
-        <footer>
-            <p>DontPage &copy; 2023 - Um simples editor de texto online</p>
-        </footer>
+    <div class="page-form">
+        <input type="text" id="page-name" placeholder="Digite um nome para sua página" autofocus>
+        <button id="create-page">Criar Página</button>
     </div>
 
-    <!-- No script do index.html, substitua o evento de clique do botão por: -->
-<script>
-    document.getElementById('create-page').addEventListener('click', function() {
-        const pageName = document.getElementById('page-name').value.trim().toLowerCase();
-        if (pageName) {
-            const cleanPageName = pageName.replace(/[^a-z0-9-]/g, '');
-            if (cleanPageName) {
-                // Tenta usar o History API primeiro
-                if (window.history && window.history.pushState) {
-                    window.location.href = `/${cleanPageName}`;
+    <footer>
+        DontPage © 2025 - Todos os direitos reservados
+    </footer>
+
+    <script>
+        document.getElementById('create-page').addEventListener('click', () => {
+            const pageName = document.getElementById('page-name').value.trim();
+            if (pageName) {
+                const cleanName = pageName.toLowerCase().replace(/[^a-z0-9-]/g, '');
+                if (cleanName) {
+                    window.location.href = `/${cleanName}`;
                 } else {
-                    // Fallback para hash se o History API não estiver disponível
-                    window.location.href = `/editor.html#${cleanPageName}`;
+                    alert('Use apenas letras, números e hífens');
                 }
-            } else {
-                alert('Por favor, use apenas letras, números e hífens no nome da página.');
             }
-        } else {
-            alert('Por favor, digite um nome para a página.');
-        }
-    });
-</script>
+        });
+
+        document.getElementById('page-name').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                document.getElementById('create-page').click();
+            }
+        });
+    </script>
 </body>
 </html>
