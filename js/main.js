@@ -1,3 +1,16 @@
+// Verifica se estamos em uma URL hash e redireciona para a URL limpa se possível
+if (window.location.pathname.includes('editor.html') && window.location.hash) {
+    const pageId = window.location.hash.substring(1);
+    if (pageId && pageId !== 'home') {
+        // Tenta usar o History API para URL limpa
+        try {
+            history.replaceState(null, null, `/${pageId}`);
+        } catch (e) {
+            console.log('Usando URL com hash');
+        }
+    }
+}
+
 // Configuração do Firebase
 const firebaseConfig = {
     apiKey: "AIzaSyC0AkBC5batGFJ_UvF5hxwswl0HsWd417s",
