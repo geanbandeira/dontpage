@@ -27,28 +27,54 @@ let currentPageId = 'home';
 let lastSavedTime = null;
 let saveTimer = null;
 
-// Função para obter o ID da página da URL
+// Substitua as funções getPageIdFromUrl e updateUrl por:
+
 function getPageIdFromUrl() {
-    if (window.location.hash) {
+    // Se estivermos no editor.html, verifica o hash
+    if (window.location.pathname.includes('editor.html')) {
         return window.location.hash.substring(1) || 'home';
     }
-    return 'home';
+    
+    // Caso contrário, pega do pathname
+    const path = window.location.pathname.substring(1);
+    return path || 'home';
 }
 
-// Função para atualizar o URL
 function updateUrl(pageId) {
-    window.location.hash = pageId;
+    // Se já estamos em uma URL limpa (/pagina), apenas atualiza o history
+    if (!window.location.pathname.includes('editor.html')) {
+        window.history.pushState({ pageId }, '', `/${pageId}`);
+    } else {
+        // Se estamos no editor.html, tenta redirecionar para URL limpa
+        if (window.history && window.history.pushState) {
+            window.location.href = `/${pageId}`;
+        } else {
+            // Fallback para hash se não puder redirecionar
+            window.location.hash = pageId;
+        }
+    }
     updateShareUrl();
 }
 
-// Função para atualizar o URL de compartilhamento
+// Atualize a função updateShareUrl para:
 function updateShareUrl() {
     if (pageUrl) {
-        const url = window.location.href.replace('/editor.html', '');
+        let url;
+        if (window.location.pathname.includes('editor.html')) {
+            url = window.location.href.replace('/editor.html', '');
+        } else {
+            url = window.location.href;
+        }
         pageUrl.value = url;
     }
 }
 
+// Adicione este código no evento DOMContentLoaded:
+if (!window.location.pathname.includes('editor.html') && window.location.pathname !== '/') {
+    // Se acessamos uma URL direta (/teste), redireciona para o editor com a página correta
+    const pageId = getPageIdFromUrl();
+    window.location.href = `/editor.html#${pageId}`;
+}
 // Função para carregar uma página
 function loadPage(pageId) {
     currentPageId = pageId.toLowerCase().replace(/[^a-z0-9-]/g, '') || 'home';
