@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dontpage-v4';
+const CACHE_NAME = 'dontpage-cache-v1';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -11,31 +11,31 @@ const urlsToCache = [
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(urlsToCache))
-      .catch(err => console.log('Falha ao instalar cache:', err))
+      .then(cache => {
+        return cache.addAll(urlsToCache);
+      })
   );
 });
 
 self.addEventListener('fetch', event => {
-  // Para navegação (páginas), sempre tente buscar na rede primeiro
+  // Para requisições de navegação (páginas)
   if (event.request.mode === 'navigate') {
-    return event.respondWith(
+    event.respondWith(
       fetch(event.request)
         .catch(() => {
-          // Se falhar, retorne a página inicial para URLs desconhecidas
-          if (event.request.url === new URL(event.request.url).origin + '/') {
-            return caches.match('/index.html');
-          }
+          // Se a página não existir, retorne o 404.html
           return caches.match('/404.html');
         })
     );
+  } else {
+    // Para outros recursos, use cache-first
+    event.respondWith(
+      caches.match(event.request)
+        .then(response => {
+          return response || fetch(event.request);
+        })
+    );
   }
-
-  // Para outros recursos, use cache-first
-  event.respondWith(
-    caches.match(event.request)
-      .then(response => response || fetch(event.request))
-  );
 });
 
 self.addEventListener('activate', event => {
