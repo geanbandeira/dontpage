@@ -14,74 +14,44 @@ firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
 
 // Elementos DOM
+const homePage = document.getElementById('home-page');
+const editorContainer = document.getElementById('editor-container');
 const editor = document.getElementById('editor');
 const pageIdDisplay = document.getElementById('page-id-display');
 const lastSaved = document.getElementById('last-saved');
 const charCount = document.getElementById('char-count');
+const pageInput = document.getElementById('page-input');
+const goButton = document.getElementById('go-button');
 
 // Estado da aplicação
 let currentPageId = 'home';
 let lastSavedTime = null;
 let saveTimer = null;
 
-// Função para obter o ID da página da URL
+// Funções auxiliares
 function getPageIdFromUrl() {
     const path = window.location.pathname.substring(1);
-    return path || 'home';
+    return path || null;
 }
 
-// Função para atualizar a URL
 function updateUrl(pageId) {
     const url = new URL(window.location.origin);
     url.pathname = pageId;
     window.history.pushState({ pageId }, '', url);
 }
 
-// Função para carregar uma página
-function loadPage(pageId) {
-    currentPageId = pageId.toLowerCase().replace(/[^a-z0-9-]/g, '') || 'home';
-    pageIdDisplay.textContent = currentPageId;
-    updateUrl(currentPageId);
-    
-    const pageRef = database.ref(`pages/${currentPageId}`);
-    
-    pageRef.on('value', (snapshot) => {
-        const data = snapshot.val();
-        if (data) {
-            editor.value = data.content || '';
-            lastSavedTime = data.updatedAt;
-            updateLastSaved();
-        } else {
-            editor.value = '';
-            lastSavedTime = null;
-            lastSaved.textContent = 'Não salvo ainda';
-        }
-        updateCharCount();
-    });
-    
-    // Foca no editor após carregar
-    setTimeout(() => editor.focus(), 100);
+function showEditor() {
+    homePage.style.display = 'none';
+    editorContainer.style.display = 'block';
+    editor.focus();
 }
 
-// Função para salvar a página
-function savePage() {
-    const content = editor.value;
-    const pageData = {
-        content: content,
-        updatedAt: new Date().toISOString()
-    };
-    
-    database.ref(`pages/${currentPageId}`).set(pageData)
-        .then(() => {
-            lastSavedTime = new Date().toISOString();
-            updateLastSaved();
-        })
-        .catch(error => {
-            console.error('Erro ao salvar:', error);
-        });
+function showHome() {
+    homePage.style.display = 'flex';
+    editorContainer.style.display = 'none';
+    pageInput.focus();
 }
 
-// Função para atualizar o status "Último salvamento"
 function updateLastSaved() {
     if (!lastSavedTime) {
         lastSaved.textContent = 'Não salvo ainda';
@@ -102,35 +72,105 @@ function updateLastSaved() {
     }
 }
 
-// Função para atualizar a contagem de caracteres
 function updateCharCount() {
     const count = editor.value.length;
     charCount.textContent = `${count} caractere${count !== 1 ? 's' : ''}`;
 }
 
-// Debounce para salvar automaticamente
 function debounceSave() {
     clearTimeout(saveTimer);
     saveTimer = setTimeout(savePage, 2000);
 }
 
+function savePage() {
+    const content = editor.value;
+    const pageData = {
+        content: content,
+        updatedAt: new Date().toISOString()
+    };
+    
+    database.ref(`pages/${currentPageId}`).set(pageData)
+        .then(() => {
+            lastSavedTime = new Date().toISOString();
+            updateLastSaved();
+        })
+        .catch(error => {
+            console.error('Erro ao salvar:', error);
+        });
+}
+
+function loadPage(pageId) {
+    // Limpa e formata o ID da página
+    pageId = (pageId || 'home').toLowerCase()
+        .replace(/[^a-z0-9-]/g, '') // Remove caracteres especiais
+        .replace(/-+/g, '-')        // Remove hífens múltiplos
+        .replace(/^-|-$/g, '');     // Remove hífens no início/fim
+    
+    if (!pageId) pageId = 'home';
+    
+    currentPageId = pageId;
+    pageIdDisplay.textContent = currentPageId;
+    updateUrl(currentPageId);
+    
+    const pageRef = database.ref(`pages/${currentPageId}`);
+    
+    pageRef.on('value', (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+            editor.value = data.content || '';
+            lastSavedTime = data.updatedAt;
+            updateLastSaved();
+        } else {
+            editor.value = '';
+            lastSavedTime = null;
+            lastSaved.textContent = 'Não salvo ainda';
+        }
+        updateCharCount();
+    });
+    
+    showEditor();
+}
+
+// Event Listeners
+goButton.addEventListener('click', () => {
+    const pageId = pageInput.value.trim();
+    if (pageId) {
+        loadPage(pageId);
+    }
+});
+
+pageInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+        const pageId = pageInput.value.trim();
+        if (pageId) {
+            loadPage(pageId);
+        }
+    }
+});
+
+editor.addEventListener('input', () => {
+    updateCharCount();
+    debounceSave();
+});
+
+window.addEventListener('popstate', (event) => {
+    const pageId = getPageIdFromUrl();
+    if (pageId) {
+        loadPage(pageId);
+    } else {
+        showHome();
+    }
+});
+
 // Inicialização
 document.addEventListener('DOMContentLoaded', () => {
-    // Carrega a página baseada na URL
-    loadPage(getPageIdFromUrl());
+    const pageId = getPageIdFromUrl();
     
-    // Event listeners
-    editor.addEventListener('input', () => {
-        updateCharCount();
-        debounceSave();
-    });
-    
-    // Lidar com mudanças de URL (back/forward)
-    window.addEventListener('popstate', (event) => {
-        if (event.state && event.state.pageId) {
-            loadPage(event.state.pageId);
-        }
-    });
+    if (pageId) {
+        loadPage(pageId);
+    } else {
+        showHome();
+    }
 });
 
 // Service Worker para funcionar offline
