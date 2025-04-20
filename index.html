@@ -43,28 +43,27 @@
         </footer>
     </div>
 
-    <script>
-        document.getElementById('create-page').addEventListener('click', function() {
-            const pageName = document.getElementById('page-name').value.trim().toLowerCase();
-            if (pageName) {
-                // Remove caracteres especiais e mantém apenas letras, números e hífens
-                const cleanPageName = pageName.replace(/[^a-z0-9-]/g, '');
-                if (cleanPageName) {
-                    window.location.href = `/editor.html#${cleanPageName}`;
+    <!-- No script do index.html, substitua o evento de clique do botão por: -->
+<script>
+    document.getElementById('create-page').addEventListener('click', function() {
+        const pageName = document.getElementById('page-name').value.trim().toLowerCase();
+        if (pageName) {
+            const cleanPageName = pageName.replace(/[^a-z0-9-]/g, '');
+            if (cleanPageName) {
+                // Tenta usar o History API primeiro
+                if (window.history && window.history.pushState) {
+                    window.location.href = `/${cleanPageName}`;
                 } else {
-                    alert('Por favor, use apenas letras, números e hífens no nome da página.');
+                    // Fallback para hash se o History API não estiver disponível
+                    window.location.href = `/editor.html#${cleanPageName}`;
                 }
             } else {
-                alert('Por favor, digite um nome para a página.');
+                alert('Por favor, use apenas letras, números e hífens no nome da página.');
             }
-        });
-
-        // Permite pressionar Enter para criar a página
-        document.getElementById('page-name').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                document.getElementById('create-page').click();
-            }
-        });
-    </script>
+        } else {
+            alert('Por favor, digite um nome para a página.');
+        }
+    });
+</script>
 </body>
 </html>

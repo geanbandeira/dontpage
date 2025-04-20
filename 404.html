@@ -3,17 +3,19 @@
 <head>
     <meta charset="utf-8">
     <title>Redirecionando...</title>
+</head>
+<body>
+    <p>Redirecionando...</p>
+
     <script>
-        // Extrai o path da URL e redireciona para a página principal com o hash
-        const path = window.location.pathname.substring(1);
-        if (path) {
-            window.location.href = '/#' + path;
+        const path = window.location.pathname;
+        if (path.startsWith('/editor.html')) {
+            window.location.href = path;
+        } else if (path !== '/') {
+            window.location.href = `/editor.html#${path.substring(1)}`;
         } else {
             window.location.href = '/';
         }
     </script>
-</head>
-<body>
-    <p>Redirecionando...</p>
 </body>
 </html>
