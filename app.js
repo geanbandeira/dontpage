@@ -49,6 +49,8 @@ function initializeApp() {
     const shareTelegramBtn = document.getElementById('share-telegram');
     const newPageBtn = document.getElementById('new-page');
     const themeToggle = document.getElementById('theme-toggle');
+
+    
     
     // Verifica tema preferido do usuário
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -146,17 +148,35 @@ function initializeApp() {
 
     // Cria nova página
     function createNewPage() {
-        const newPageName = prompt('Digite um nome para a nova página:');
-        if (newPageName) {
-            const cleanName = newPageName.toLowerCase()
-                .replace(/\s+/g, '-')
-                .replace(/[^a-z0-9-]/g, '');
-            if (cleanName) {
-                window.location.href = `/${cleanName}`;
-            } else {
-                showToast('Use apenas letras, números e hífens');
+        Swal.fire({
+            title: 'Criar nova página',
+            input: 'text',
+            inputLabel: 'Digite um nome para a nova página:',
+            inputPlaceholder: 'Ex: minha-pagina',
+            showCancelButton: true,
+            confirmButtonText: 'Criar',
+            cancelButtonText: 'Cancelar',
+            inputValidator: (value) => {
+                if (!value) {
+                    return 'Você precisa digitar um nome!';
+                }
+                const cleanName = value.toLowerCase()
+                    .replace(/\s+/g, '-')
+                    .replace(/[^a-z0-9-]/g, '');
+                if (!cleanName) {
+                    return 'Use apenas letras, números e hífens';
+                }
             }
-        }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const cleanName = result.value.toLowerCase()
+                    .replace(/\s+/g, '-')
+                    .replace(/[^a-z0-9-]/g, '');
+                if (cleanName) {
+                    window.location.href = `/${cleanName}`;
+                }
+            }
+        });
     }
 
     // Alterna entre temas claro/escuro
