@@ -1,58 +1,100 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR" data-theme="light">
 <head>
     <meta charset="utf-8">
-    <title>Carregando...</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DontPage - Editor Simples</title>
+    <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
-    <script src="app.js"></script>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
-        .editor-container {
-            display: none; /* Inicialmente oculto até carregar */
-        }
-        .loading {
-            text-align: center;
-            padding: 2rem;
-        }
-    </style>
+    <!-- Ícones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- CSS -->
+    <link rel="stylesheet" href="dontpage.css">
+    <!-- JS -->
+    <script src="app.js" defer></script>
+    <script src="/app.js"></script>
 </head>
 <body>
-    <div class="loading">
-        <p>Carregando sua página...</p>
-    </div>
-
-    <div class="editor-container">
-        <div class="header">
-            <h1>DontPage</h1>
-            <button id="new-page">Nova Página</button>
+    <div class="app-container">
+        <!-- Loading State -->
+        <div class="loading-state">
+            <div class="loading-animation">
+                <div class="spinner"></div>
+                <p>Carregando sua página...</p>
+            </div>
         </div>
 
-        <div class="page-info">
-            <div id="page-id-display"></div>
-        </div>
+        <!-- Editor Interface -->
+        <div class="editor-interface" style="display: none;">
+            <!-- App Header -->
+            <header class="app-header">
+                <div class="header-left">
+                    <h1 class="app-title">DontPage</h1>
+                    <div class="page-id-display" id="page-id-display"></div>
+                </div>
+                <div class="header-right">
+                    <button class="btn icon-btn" id="theme-toggle" title="Alternar tema">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <button class="btn primary-btn" id="new-page">
+                        <i class="fas fa-plus"></i> Nova Página
+                    </button>
+                </div>
+            </header>
 
-        <textarea id="editor" placeholder="Digite seu conteúdo aqui..."></textarea>
+            <!-- Main Editor -->
+            <main class="editor-main">
+                <textarea id="editor" class="markdown-editor" placeholder="Digite seu conteúdo aqui..."></textarea>
+            </main>
 
-        <div class="status-bar">
-            <div id="last-saved">Não salvo ainda</div>
-            <div id="char-count">0 caracteres</div>
-        </div>
+            <!-- Status Bar -->
+            <footer class="status-bar">
+                <div class="status-left">
+                    <span id="last-saved">Não salvo ainda</span>
+                </div>
+                <div class="status-right">
+                    <span id="char-count">0 caracteres</span>
+                    <div class="export-dropdown">
+                        <button class="btn icon-btn export-btn" title="Exportar">
+                            <i class="fas fa-download"></i>
+                        </button>
+                        <div class="export-menu">
+                            <button class="export-option" data-format="pdf"><i class="fas fa-file-pdf"></i> PDF</button>
+                            <button class="export-option" data-format="html"><i class="fas fa-code"></i> HTML</button>
+                            <button class="export-option" data-format="docx"><i class="fas fa-file-word"></i> Word</button>
+                            <button class="export-option" data-format="odt"><i class="fas fa-file-alt"></i> ODT</button>
+                            <button class="export-option" data-format="txt"><i class="fas fa-file-lines"></i> Texto</button>
+                        </div>
+                    </div>
+                </div>
+            </footer>
 
-        <div class="share-section">
-            <h3>Compartilhar esta página</h3>
-            <div class="share-controls">
-                <input type="text" id="page-url" readonly>
-                <button id="copy-url">Copiar URL</button>
-                <button id="share-whatsapp">WhatsApp</button>
+            <!-- Share Panel -->
+            <div class="share-panel">
+                <h3><i class="fas fa-share-alt"></i> Compartilhar esta página</h3>
+                <div class="share-controls">
+                    <div class="url-input-container">
+                        <input type="text" id="page-url" readonly>
+                        <button class="btn icon-btn" id="copy-url" title="Copiar URL">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                    <div class="social-share">
+                        <button class="btn social-btn whatsapp" id="share-whatsapp">
+                            <i class="fab fa-whatsapp"></i> WhatsApp
+                        </button>
+                        <button class="btn social-btn telegram" id="share-telegram">
+                            <i class="fab fa-telegram"></i> Telegram
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast"></div>
 
     <script>
         // Extrai o nome da página da URL
@@ -68,13 +110,18 @@
 
         function initializeEditor(pageId) {
             // Mostra o editor e esconde o loading
-            document.querySelector('.editor-container').style.display = 'block';
-            document.querySelector('.loading').style.display = 'none';
+            document.querySelector('.editor-interface').style.display = 'flex';
+            document.querySelector('.loading-state').style.display = 'none';
             
             // Inicializa a aplicação
             initializeApp();
             loadPage(pageId);
         }
     </script>
+
+    <!-- Adicione isso no final do body se quiser pré-carregar -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/docx/7.8.2/docx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 </body>
 </html>

@@ -23,6 +23,17 @@ function initializeFirebase() {
     return firebase.database();
 }
 
+// Mostra notificação toast
+function showToast(message, duration = 3000) {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.classList.add('show');
+    
+    setTimeout(() => {
+        toast.classList.remove('show');
+    }, duration);
+}
+
 // Inicializa a aplicação
 function initializeApp() {
     database = initializeFirebase();
@@ -35,7 +46,16 @@ function initializeApp() {
     const pageUrl = document.getElementById('page-url');
     const copyUrlBtn = document.getElementById('copy-url');
     const shareWhatsappBtn = document.getElementById('share-whatsapp');
+    const shareTelegramBtn = document.getElementById('share-telegram');
     const newPageBtn = document.getElementById('new-page');
+    const themeToggle = document.getElementById('theme-toggle');
+    
+    // Verifica tema preferido do usuário
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const savedTheme = localStorage.getItem('theme');
+    const initialTheme = savedTheme || (prefersDark ? 'dark' : 'light');
+    document.documentElement.setAttribute('data-theme', initialTheme);
+    updateThemeIcon(initialTheme);
 
     // Função para carregar uma página
     function loadPage(pageId) {
@@ -54,6 +74,9 @@ function initializeApp() {
                 updateCharCount();
                 setTimeout(() => editor.focus(), 100);
             }
+        }, (error) => {
+            console.error('Erro ao carregar página:', error);
+            showToast('Erro ao carregar a página');
         });
     }
 
@@ -111,6 +134,7 @@ function initializeApp() {
             })
             .catch(error => {
                 console.error('Erro ao salvar:', error);
+                showToast('Erro ao salvar a página');
             });
     }
 
@@ -130,9 +154,116 @@ function initializeApp() {
             if (cleanName) {
                 window.location.href = `/${cleanName}`;
             } else {
-                alert('Por favor, use apenas letras, números e hífens');
+                showToast('Use apenas letras, números e hífens');
             }
         }
+    }
+
+    // Alterna entre temas claro/escuro
+    function toggleTheme() {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        updateThemeIcon(newTheme);
+    }
+
+    // Atualiza ícone do tema
+    function updateThemeIcon(theme) {
+        if (!themeToggle) return;
+        const icon = themeToggle.querySelector('i');
+        
+        if (theme === 'dark') {
+            icon.classList.replace('fa-moon', 'fa-sun');
+            themeToggle.setAttribute('title', 'Tema claro');
+        } else {
+            icon.classList.replace('fa-sun', 'fa-moon');
+            themeToggle.setAttribute('title', 'Tema escuro');
+        }
+    }
+
+    // Exporta conteúdo para diferentes formatos
+    function exportContent(format) {
+        const content = editor.value;
+        const filename = `dontpage-${currentPageId}.${format}`;
+        
+        switch(format) {
+            case 'pdf':
+                // Usando jsPDF para gerar PDF
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                doc.text(content, 10, 10);
+                doc.save(filename);
+                break;
+                
+            case 'html':
+                const htmlContent = `<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>${filename}</title>
+</head>
+<body>
+    <pre>${content}</pre>
+</body>
+</html>`;
+                downloadFile(htmlContent, filename, 'text/html');
+                break;
+                
+            case 'docx':
+                // Usando docx para gerar documento Word
+                const { Document, Paragraph, TextRun } = window.docx;
+                const docx = new Document({
+                    sections: [{
+                        properties: {},
+                        children: [
+                            new Paragraph({
+                                children: [
+                                    new TextRun(content)
+                                ]
+                            })
+                        ]
+                    }]
+                });
+                
+                const packer = new window.docx.Packer();
+                packer.toBlob(docx).then(blob => {
+                    saveAs(blob, filename);
+                });
+                break;
+                
+            case 'odt':
+                // Implementação simplificada para ODT
+                const odtContent = `<?xml version="1.0" encoding="UTF-8"?>
+<office:document xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0">
+    <office:body>
+        <office:text>
+            <text:p>${content}</text:p>
+        </office:text>
+    </office:body>
+</office:document>`;
+                downloadFile(odtContent, filename, 'application/vnd.oasis.opendocument.text');
+                break;
+                
+            case 'txt':
+                downloadFile(content, filename, 'text/plain');
+                break;
+        }
+    }
+
+    // Função auxiliar para download de arquivo
+    function downloadFile(content, filename, mimeType) {
+        const blob = new Blob([content], { type: mimeType });
+        const url = URL.createObjectURL(blob);
+        
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
     }
 
     // Configura event listeners
@@ -147,10 +278,7 @@ function initializeApp() {
         copyUrlBtn.addEventListener('click', () => {
             pageUrl.select();
             document.execCommand('copy');
-            copyUrlBtn.textContent = 'Copiado!';
-            setTimeout(() => {
-                copyUrlBtn.textContent = 'Copiar URL';
-            }, 2000);
+            showToast('URL copiada para a área de transferência');
         });
     }
 
@@ -161,11 +289,54 @@ function initializeApp() {
         });
     }
 
+    if (shareTelegramBtn) {
+        shareTelegramBtn.addEventListener('click', () => {
+            const url = encodeURIComponent(pageUrl.value);
+            window.open(`https://t.me/share/url?url=${url}`, '_blank');
+        });
+    }
+
     if (newPageBtn) {
         newPageBtn.addEventListener('click', createNewPage);
     }
 
-    // Exporta funções para uso no 404.html
+    if (themeToggle) {
+        themeToggle.addEventListener('click', toggleTheme);
+    }
+
+    // Configura exportação
+    document.querySelectorAll('.export-option').forEach(option => {
+        option.addEventListener('click', () => {
+            const format = option.dataset.format;
+            
+            // Carrega bibliotecas necessárias dinamicamente
+            if (format === 'pdf' && !window.jspdf) {
+                loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js')
+                    .then(() => exportContent(format))
+                    .catch(() => showToast('Erro ao carregar biblioteca PDF'));
+            } else if (format === 'docx' && !window.docx) {
+                loadScript('https://cdnjs.cloudflare.com/ajax/libs/docx/7.8.2/docx.min.js')
+                    .then(() => loadScript('https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js'))
+                    .then(() => exportContent(format))
+                    .catch(() => showToast('Erro ao carregar biblioteca Word'));
+            } else {
+                exportContent(format);
+            }
+        });
+    });
+
+    // Função para carregar scripts dinamicamente
+    function loadScript(src) {
+        return new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = src;
+            script.onload = resolve;
+            script.onerror = reject;
+            document.head.appendChild(script);
+        });
+    }
+
+    // Exporta funções para uso no HTML
     window.initializeEditor = initializeEditor;
     window.loadPage = loadPage;
 }
