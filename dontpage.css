@@ -1,38 +1,41 @@
 :root {
-    /* Light Theme */
-    --bg-color: #ffffff;
-    --text-color: #333333;
-    --primary-color: #4a6bff;
-    --primary-hover: #3a5bef;
-    --secondary-color: #f0f2f5;
-    --border-color: #e1e4e8;
+    /* Light Theme - Futuro Neon Soft */
+    --bg-color: #f8faff;
+    --text-color: #1a1d2e;
+    --primary-color: #5d6cff;
+    --primary-hover: #4a5bef;
+    --secondary-color: #eef0ff;
+    --border-color: #d8ddf0;
     --editor-bg: #ffffff;
-    --editor-text: #333333;
-    --editor-border: #e1e4e8;
-    --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    --editor-text: #1a1d2e;
+    --editor-border: #d8ddf0;
+    --shadow: 0 6px 16px rgba(93, 108, 255, 0.12);
     --card-bg: #ffffff;
     --input-bg: #ffffff;
-    --status-bg: #f8f9fa;
-    --toast-bg: #333333;
+    --status-bg: #f0f2ff;
+    --toast-bg: #1a1d2e;
     --toast-text: #ffffff;
+    --accent-tech: #00f0ff; /* Destaque tecnológico */
 }
 
 [data-theme="dark"] {
-    --bg-color: #1e1e2e;
-    --text-color: #e0e0e0;
-    --primary-color: #5a7dff;
-    --primary-hover: #4a6dff;
-    --secondary-color: #2d2d3d;
-    --border-color: #3a3a4a;
-    --editor-bg: #252536;
-    --editor-text: #e0e0e0;
-    --editor-border: #3a3a4a;
-    --shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    --card-bg: #2d2d3d;
-    --input-bg: #2d2d3d;
-    --status-bg: #252536;
-    --toast-bg: #e0e0e0;
-    --toast-text: #333333;
+    /* Dark Theme - Cyber Noir */
+    --bg-color: #0f1218;
+    --text-color: #e0f2ff;
+    --primary-color: #5d6cff;
+    --primary-hover: #6d7cff;
+    --secondary-color: #1a1f2a;
+    --border-color: #2a3440;
+    --editor-bg: #161b24;
+    --editor-text: #d0e4ff;
+    --editor-border: #2a3440;
+    --shadow: 0 6px 20px rgba(0, 240, 255, 0.15);
+    --card-bg: #1a1f2a;
+    --input-bg: #161b24;
+    --status-bg: #1a2430;
+    --toast-bg: #00f0ff;
+    --toast-text: #0f1218;
+    --accent-tech: #00f0ff; /* Destaque tecnológico */
 }
 
 * {
@@ -399,3 +402,4 @@ body {
         justify-content: space-between;
     }
 }
+
