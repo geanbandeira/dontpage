@@ -210,12 +210,58 @@ function initializeApp() {
         
         switch(format) {
             case 'pdf':
-                // Usando jsPDF para gerar PDF
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF();
-                doc.text(content, 10, 10);
-                doc.save(filename);
-                break;
+    // Usando jsPDF para gerar PDF com múltiplas páginas
+    const { jsPDF } = window.jspdf;
+    
+    // Configurações do PDF
+    const doc = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+    });
+
+    // Margens do documento
+    const margins = {
+        top: 30,
+        bottom: 20,
+        left: 30,
+        right: 20
+    };
+
+    // Tamanho útil da página
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const usableWidth = pageWidth - margins.left - margins.right;
+    const usableHeight = pageHeight - margins.top - margins.bottom;
+
+    // Configurações do texto
+    const lineHeight = 5;
+    const fontSize = 12;
+    doc.setFontSize(fontSize);
+
+    // Dividir o conteúdo em linhas que cabem na página
+    const splitText = doc.splitTextToSize(content, usableWidth);
+
+    let y = margins.top;
+    let pageNumber = 1;
+
+    // Adicionar texto página por página
+    for (let i = 0; i < splitText.length; i++) {
+        // Verificar se precisa de nova página
+        if (y + lineHeight > pageHeight - margins.bottom) {
+            doc.addPage();
+            y = margins.top;
+            pageNumber++;
+        }
+        
+        // Adicionar linha de texto
+        doc.text(splitText[i], margins.left, y);
+        y += lineHeight;
+    }
+
+    // Salvar o PDF
+    doc.save(filename);
+    break;
                 
             case 'html':
                 const htmlContent = `<!DOCTYPE html>
